@@ -59,22 +59,33 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         }))
         .await?;
 
-    // You can use print statements as follows for debugging, they'll be visible when running tests.
-    eprintln!("Logs from your program will appear here!");
+   // Safely extract the message block from the first choice
+    if let Some(message) = response["choices"][0]["message"].as_object() {
+        // 1. Check if the LLM generated any tool calls
+        if let Some(tool_calls) = message.get("tool_calls").and_then(|t| t.as_array()) {
+            if !tool_calls.is_empty() {
+                let tool_call = &tool_calls[0];
+                let name = tool_call["function"]["name"].as_str().unwrap();
+                
+                // Parse the arguments JSON string
+                let arguments_str = tool_call["function"]["arguments"].as_str().unwrap();
+                let arguments: Value = serde_json::from_str(arguments_str)?;
 
-    if let Some(tool_calls) = message["tool_calla"].as_array() {
-        let tool_call = &tool_calls[0];
-        let name = tool_call["function"]["name"].as_str().umwrap();
-        let arguments: Value = serde_json::from_str(tool_call["functio"]["arguments"].as_str().unwrap())?;
-
-        if name  == "Read" {
-            let file_path = arguments["file_path"].as_str().unwrap();
-            let contents = std::fs::read_to_string(file_path)?;
-            print!("{}", contents);
+                if name == "Read" {
+                    let file_path = arguments["file_path"].as_str().unwrap();
+                    // Read the local file contents
+                    let contents = std::fs::read_to_string(file_path)?;
+                    // Print raw file contents directly to stdout
+                    print!("{}", contents);
+                }
+                return Ok(());
+            }
         }
-    }
-    else if let Some(content) = response["choices"][0]["message"]["content"].as_str() {
-        println!("{}", content);
+        
+        // 2. Fallback: If no tool calls exist, print the regular assistant response
+        if let Some(content) = message.get("content").and_then(|c| c.as_str()) {
+            print!("{}", content);
+        }
     }
 
     Ok(())
