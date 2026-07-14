@@ -56,34 +56,24 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                                         }
                                     }
                     }],
-            "choices": [
-                        {
-                        "index": 0,
-                        "message": {
-                            "role": "assistant",
-                            "content": null,
-                            "tool_calls": [
-                            {
-                                "id": "call_abc123",
-                                "type": "function",
-                                "function": {
-                                "name": "Read",
-                                "arguments": "{\"file_path\": \"/path/to/file.txt\"}"
-                                }
-                            }
-                            ]
-                        },
-                        "finish_reason": "tool_calls"
-                        }
-                    ]
         }))
         .await?;
 
     // You can use print statements as follows for debugging, they'll be visible when running tests.
     eprintln!("Logs from your program will appear here!");
 
-    // TODO: Uncomment the lines below to pass the first stage
-    if let Some(content) = response["choices"][0]["message"]["content"].as_str() {
+    if let Some(tool_calls) = message["tool_calla"].as_array() {
+        let tool_call = &tool_calls[0];
+        let name = tool_call["function"]["name"].as_str().umwrap();
+        let arguments: Value = serde_json::from_str(tool_call["functio"]["arguments"].as_str().unwrap())?;
+
+        if name  == "Read" {
+            let file_path = arguments["file_path"].as_str().unwrap();
+            let contents = std::fs::read_to_string(file_path)?;
+            print!("{}", contents);
+        }
+    }
+    else if let Some(content) = response["choices"][0]["message"]["content"].as_str() {
         println!("{}", content);
     }
 
