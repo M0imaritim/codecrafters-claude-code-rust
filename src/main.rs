@@ -108,7 +108,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                             "content": contents
                         }))
                     }
-                    return Ok(());
+                    continue;
                 }
 
                 
