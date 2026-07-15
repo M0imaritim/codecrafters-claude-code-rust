@@ -38,8 +38,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     loop {
         let response: Value = client
             .chat()
-            .create_byot(messages,
-                json!({
+            .create_byot(json!({
+                "messages": &messages,
                 "model": "anthropic/claude-haiku-4.5",
                 "tools": [{
                             "type": "function",
