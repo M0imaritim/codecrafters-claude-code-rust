@@ -66,7 +66,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                                 "description": "Write content to a file",
                                 "parameters": {
                                 "type": "object",
-                                "required": ["file_path", "contents"],
+                                "required": ["file_path", "content"],
                                 "properties": {
                                     "file_path": {
                                     "type": "string",
@@ -132,7 +132,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                             .and_then(|p| p.as_str())
                             .ok_or("Missing file path")?;
                         let contents = arguments
-                            .get("contents")
+                            .get("content")
                             .and_then(|c| c.as_str())
                             .ok_or("Missing contents")?; 
                         std::fs::write(file_path, contents)?;
