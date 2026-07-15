@@ -65,17 +65,32 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         if let Some(tool_calls) = message.get("tool_calls").and_then(|t| t.as_array()) {
             if !tool_calls.is_empty() {
                 let tool_call = &tool_calls[0];
-                let name = tool_call["function"]["name"].as_str().unwrap();
-                
-                // Parse the arguments JSON string
-                let arguments_str = tool_call["function"]["arguments"].as_str().unwrap();
-                let arguments: Value = serde_json::from_str(arguments_str)?;
+
+                let name = tool_call
+                    .get("function")
+                    .and_then(|f| f.get("name"))
+                    .and_then(|n| n.as_str())
+                    .ok_or("Missing tool name")?;
+
+                let arguments_str = tool_call
+                    .get("function")
+                    .and_then(|f| f.get("arguments"))
+                    .and_then(|a| a.as_str())
+                    .ok_or("Missing tool arguments")?;
+
+                let arguments: Value =
+                    serde_json::from_str(arguments_str)?;
 
                 if name == "Read" {
-                    let file_path = arguments["file_path"].as_str().unwrap();
-                    // Read the local file contents
-                    let contents = std::fs::read_to_string(file_path)?;
-                    // Print raw file contents directly to stdout
+
+                    let file_path = arguments
+                        .get("file_path")
+                        .and_then(|p| p.as_str())
+                        .ok_or("Missing file path")?;
+
+                    let contents =
+                        std::fs::read_to_string(file_path)?;
+
                     print!("{}", contents);
                 }
                 return Ok(());
