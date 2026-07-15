@@ -135,7 +135,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                             .get("content")
                             .and_then(|c| c.as_str())
                             .ok_or("Missing contents")?; 
-                        std::fs::write(file_path, contents)?;
+                        std::fs::write(file_path, content)?;
 
                     let tool_call_id = tool_call["id"].as_str().ok_or("MIssing tool id")?;
                     
