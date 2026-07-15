@@ -60,6 +60,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             }))
             .await?;
         let message = response["choices"][0]["message"].clone();
+        eprintln!("{}", serde_json::to_string_pretty(&message)?);
         messages.push(message.clone());
         
 
