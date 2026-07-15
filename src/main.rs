@@ -66,7 +66,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
    // Safely extract the message block from the first choice
     if let Some(message_obj) = message.as_object() {
         // 1. Check if the LLM generated any tool calls
-        let mut executed_tools =false;
+        let mut executed_tools = false;
         if let Some(tool_calls) = message_obj.get("tool_calls").and_then(|t| t.as_array()) {
             for tool_call in tool_calls {
                 // if !tool_calls.is_empty() {
