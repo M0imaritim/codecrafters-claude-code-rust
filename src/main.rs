@@ -29,78 +29,94 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let client = Client::with_config(config);
 
     #[allow(unused_variables)]
-    let response: Value = client
-        .chat()
-        .create_byot(json!({
-            "messages": [
-                {
-                    "role": "user",
-                    "content": args.prompt
-                }
-            ],
-            "model": "anthropic/claude-haiku-4.5",
-            "tools": [{
-                        "type": "function",
-                        "function": {
-                                        "name": "Read",
-                                        "description": "Read and return the contents of a file",
-                                        "parameters": {
-                                        "type": "object",
-                                        "properties": {
-                                            "file_path": {
-                                            "type": "string",
-                                            "description": "The path to the file to read"
+    let mut messages: Vec<Value> = vec![
+        json!({
+            "role": "user",
+            "content": args.propmt
+        })
+    ];
+    loop {
+        let response: Value = client
+            .chat()
+            .create_byot(json!({
+                "messages": [
+                    {
+                        "role": "user",
+                        "content": args.prompt
+                    }
+                ],
+                "model": "anthropic/claude-haiku-4.5",
+                "tools": [{
+                            "type": "function",
+                            "function": {
+                                            "name": "Read",
+                                            "description": "Read and return the contents of a file",
+                                            "parameters": {
+                                            "type": "object",
+                                            "properties": {
+                                                "file_path": {
+                                                "type": "string",
+                                                "description": "The path to the file to read"
+                                                }
+                                            },
+                                            "required": ["file_path"]
                                             }
-                                        },
-                                        "required": ["file_path"]
                                         }
-                                    }
-                    }],
-        }))
-        .await?;
+                        }],
+            }))
+            .await?;
+        let message = response["choices"][0]["message"].clone();
+        messages.push(message.clone());
+        
 
    // Safely extract the message block from the first choice
     if let Some(message) = response["choices"][0]["message"].as_object() {
         // 1. Check if the LLM generated any tool calls
         if let Some(tool_calls) = message.get("tool_calls").and_then(|t| t.as_array()) {
-            if !tool_calls.is_empty() {
-                let tool_call = &tool_calls[0];
+            for tool_call in tool_calls {
+                if !tool_calls.is_empty() {
+                    let tool_call = &tool_calls[0];
 
-                let name = tool_call
-                    .get("function")
-                    .and_then(|f| f.get("name"))
-                    .and_then(|n| n.as_str())
-                    .ok_or("Missing tool name")?;
+                    let name = tool_call
+                        .get("function")
+                        .and_then(|f| f.get("name"))
+                        .and_then(|n| n.as_str())
+                        .ok_or("Missing tool name")?;
 
-                let arguments_str = tool_call
-                    .get("function")
-                    .and_then(|f| f.get("arguments"))
-                    .and_then(|a| a.as_str())
-                    .ok_or("Missing tool arguments")?;
+                    let arguments_str = tool_call
+                        .get("function")
+                        .and_then(|f| f.get("arguments"))
+                        .and_then(|a| a.as_str())
+                        .ok_or("Missing tool arguments")?;
 
-                let arguments: Value =
-                    serde_json::from_str(arguments_str)?;
+                    let arguments: Value =
+                        serde_json::from_str(arguments_str)?;
 
-                if name == "Read" {
+                    if name == "Read" {
 
-                    let file_path = arguments
-                        .get("file_path")
-                        .and_then(|p| p.as_str())
-                        .ok_or("Missing file path")?;
+                        let file_path = arguments
+                            .get("file_path")
+                            .and_then(|p| p.as_str())
+                            .ok_or("Missing file path")?;
 
-                    let contents =
-                        std::fs::read_to_string(file_path)?;
+                        let contents =
+                            std::fs::read_to_string(file_path)?;
 
-                    print!("{}", contents);
+                        print!("{}", contents);
+                    }
+                    return Ok(());
                 }
-                return Ok(());
             }
+
         }
         
         // 2. Fallback: If no tool calls exist, print the regular assistant response
         if let Some(content) = message.get("content").and_then(|c| c.as_str()) {
             print!("{}", content);
+            break;
         }
+    }
+
     }
 
     Ok(())
