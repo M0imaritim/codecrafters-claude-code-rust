@@ -32,7 +32,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut messages: Vec<Value> = vec![
         json!({
             "role": "user",
-            "content": args.propmt
+            "content": args.prompt
         })
     ];
     loop {
@@ -106,6 +106,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     }
                     return Ok(());
                 }
+
+                let tool_call_id =
+                    tool_call["id"]
+                        .as_str()
+                        .ok_or("Missing tool id")?;
+
+                messages.push(json!({
+                    "role":"tool",
+                    "tool_call_id": tool_call_id,
+                    "content": contents
+                }))
             }
 
         }
