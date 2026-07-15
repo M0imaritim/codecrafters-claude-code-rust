@@ -65,12 +65,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         
 
    // Safely extract the message block from the first choice
-    if let Some(message) = response["choices"][0]["message"].as_object() {
+    if let Some(message_obj) = message.as_object() {
         // 1. Check if the LLM generated any tool calls
-        if let Some(tool_calls) = message.get("tool_calls").and_then(|t| t.as_array()) {
+        if let Some(tool_calls) = message_obj.get("tool_calls").and_then(|t| t.as_array()) {
             for tool_call in tool_calls {
-                if !tool_calls.is_empty() {
-                    let tool_call = &tool_calls[0];
+                // if !tool_calls.is_empty() {
+                    // let tool_call = &tool_calls[0];
 
                     let name = tool_call
                         .get("function")
@@ -109,7 +109,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                         }))
                     }
                     continue;
-                }
+                
 
                 
             }
@@ -117,7 +117,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
         
         // 2. Fallback: If no tool calls exist, print the regular assistant response
-        if let Some(content) = message.get("content").and_then(|c| c.as_str()) {
+        if let Some(content) = message_obj.get("content").and_then(|c| c.as_str()) {
             print!("{}", content);
             break;
         }
