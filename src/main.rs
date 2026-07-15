@@ -103,6 +103,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                                 .as_str()
                                 .ok_or("Missing tool id")?;
 
+                        executed_tools = true;
+
                         messages.push(json!({
                             "role":"tool",
                             "tool_call_id": tool_call_id,
