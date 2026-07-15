@@ -34,7 +34,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             "content": args.prompt
         })
     ];
-    loop {
+    'agent: loop {
         let response: Value = client
             .chat()
             .create_byot(json!({
@@ -67,7 +67,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
    // Safely extract the message block from the first choice
     if let Some(message_obj) = message.as_object() {
         // 1. Check if the LLM generated any tool calls
-        let mut executed_tools = false;
         if let Some(tool_calls) = message_obj.get("tool_calls").and_then(|t| t.as_array()) {
             for tool_call in tool_calls {
                 // if !tool_calls.is_empty() {
@@ -113,15 +112,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     }                
             }
 
-        }
-        if executed_tools {
-            continue;
+        
+        continue 'agent;
         }
         
         // 2. Fallback: If no tool calls exist, print the regular assistant response
         if let Some(content) = message_obj.get("content").and_then(|c| c.as_str()) {
             print!("{}", content);
-            break;
+            break 'agent;
         }
     }
 
