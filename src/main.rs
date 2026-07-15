@@ -28,7 +28,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let client = Client::with_config(config);
 
-    #[allow(unused_variables)]
     let mut messages: Vec<Value> = vec![
         json!({
             "role": "user",
@@ -67,6 +66,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
    // Safely extract the message block from the first choice
     if let Some(message_obj) = message.as_object() {
         // 1. Check if the LLM generated any tool calls
+        let mut executed_tools =false;
         if let Some(tool_calls) = message_obj.get("tool_calls").and_then(|t| t.as_array()) {
             for tool_call in tool_calls {
                 // if !tool_calls.is_empty() {
@@ -107,13 +107,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                             "tool_call_id": tool_call_id,
                             "content": contents
                         }))
-                    }
-                    continue;
-                
-
-                
+                    }                
             }
 
+        }
+        if executed_tools {
+            continue;
         }
         
         // 2. Fallback: If no tool calls exist, print the regular assistant response
