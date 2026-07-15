@@ -146,8 +146,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                         }))
                     }
                     }
+                    continue 'agent;
                 }
-            continue 'agent;
             }
         
             // 2. Fallback: If no tool calls exist, print the regular assistant response
