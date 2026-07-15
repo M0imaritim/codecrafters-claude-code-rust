@@ -116,6 +116,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                         let contents =
                             std::fs::read_to_string(file_path)?;
 
+                        let tool_call_id = tool_call["id"].as_str().ok_or("MIssing tool id")?;
+                    
+                        messages.push(json!({
+                                "role": "tool",
+                                "tool_call_id": tool_call_id,
+                                "content": contents
+                            }))
+
                     }
 
                     if name == "Write" {
