@@ -131,10 +131,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                             .get("file_path")
                             .and_then(|p| p.as_str())
                             .ok_or("Missing file path")?;
-                        let contents = arguments
+                        let content = arguments
                             .get("content")
                             .and_then(|c| c.as_str())
-                            .ok_or("Missing contents")?; 
+                            .ok_or("Missing content")?; 
                         std::fs::write(file_path, content)?;
 
                     let tool_call_id = tool_call["id"].as_str().ok_or("MIssing tool id")?;
@@ -142,7 +142,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     messages.push(json!({
                             "role": "tool",
                             "tool_call_id": tool_call_id,
-                            "content": contents
+                            "content": "File written successfully"
                         }))
                     }
                     }
