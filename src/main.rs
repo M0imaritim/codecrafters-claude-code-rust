@@ -134,12 +134,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                             .and_then(|c| c.as_str())
                             .ok_or("Missing contents")?; 
                         std::fs::write(file_path, contents)?;
-                    }
+                    
                     messages.push(json!({
                             "role": "tool",
                             "tool_call_id": tool_call_id,
                             "content": contents
                         }))
+                    }
                     }
                 }
             continue 'agent;
