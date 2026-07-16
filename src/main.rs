@@ -186,7 +186,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     messages.push(json!({
                             "role": "tool",
                             "tool_call_id": tool_call_id,
-                            "command": command_stdout
+                            "content": command_stdout
                         }))
                     }
                     }
