@@ -175,8 +175,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                         .arg(&command)
                         .output();
 
-                    println!("{}", String::from_utf8_lossy(&output.stdout));
-                    eprintln!("{}", String::from_utf8_lossy(&output.stderr));
+                    println!("{}", String::from_utf8_lossy(&output.unwrap().stdout));
+                    eprintln!("{}", String::from_utf8_lossy(&output.unwrap().stderr));
 
                     let tool_call_id = tool_call["id"].as_str().ok_or("MIssing tool id")?;
                     
