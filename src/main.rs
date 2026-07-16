@@ -173,8 +173,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
                         let output = Command::new("bash")
                         .arg("-c")
-                        .arg(&command)
-                        .output()?;
+                        .arg(&command)?;
+                        // .output()?;
 
                     println!("{}", String::from_utf8_lossy(&output.stdout));
                     eprintln!("{}", String::from_utf8_lossy(&output.stderr));
