@@ -1,7 +1,7 @@
 use async_openai::{Client, config::OpenAIConfig};
 use clap::Parser;
 use serde_json::{Value, json};
-use std::{env, process};
+use std::{env, process::Command};
 
 #[derive(Parser)]
 #[command(author, version, about)]
@@ -79,7 +79,25 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                                 }
                                 }
                             }
-                        }],
+                        },
+                        {
+                            "type": "function",
+                            "function": {
+                                "name": "Bash",
+                                "description": "Execute a shell command",
+                                "parameters": {
+                                "type": "object",
+                                "required": ["command"],
+                                "properties": {
+                                    "command": {
+                                    "type": "string",
+                                    "description": "The command to execute"
+                                    }
+                                }
+                                }
+                            }
+                        }
+                    ],
             }))
             .await?;
         let message = response["choices"][0]["message"].clone();
@@ -143,6 +161,29 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                             "role": "tool",
                             "tool_call_id": tool_call_id,
                             "content": "File written successfully"
+                        }))
+                    }
+
+                    if name == "Bash" {
+                        let command = arguments
+                            .get("command")
+                            .and_then(|c| c.as_str())
+                            .ok_or("Missing command")?;
+
+                        let output = Command::new("bash")
+                        .arg("-c")
+                        .arg(&command)
+                        .output();
+
+                    println!("{}", String::from_utf8_lossy(&output.stdout));
+                    eprintln!("{}", String::from_utf8_lossy(&output.stderr));
+
+                    let tool_call_id = tool_call["id"].as_str().ok_or("MIssing tool id")?;
+                    
+                    messages.push(json!({
+                            "role": "tool",
+                            "tool_call_id": tool_call_id,
+                            "command": "Command executed successfully"
                         }))
                     }
                     }
