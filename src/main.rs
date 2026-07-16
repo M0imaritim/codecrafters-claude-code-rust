@@ -176,6 +176,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                         .arg(&command)
                         .output()?;
 
+                    let command_stdout = String::from_utf8_lossy(&output.stderr).into_owned();
+
                     println!("{}", String::from_utf8_lossy(&output.stdout));
                     eprintln!("{}", String::from_utf8_lossy(&output.stderr));
 
@@ -184,7 +186,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     messages.push(json!({
                             "role": "tool",
                             "tool_call_id": tool_call_id,
-                            "command": output
+                            "command": command_stdout
                         }))
                     }
                     }
