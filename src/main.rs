@@ -171,7 +171,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                             .and_then(|c| c.as_str())
                             .ok_or("Missing command")?;
 
-                        let output = Command::new("bash")
+                        Command::new("bash")
                         .arg("-c")
                         .arg(&command)?;
                         // .output()?;
