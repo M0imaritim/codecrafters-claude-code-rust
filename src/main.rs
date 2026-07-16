@@ -173,20 +173,21 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
                         let output = Command::new("bash")
                         .arg("-c")
-                        .arg(&command)
+                        .arg(command)
                         .output()?;
 
-                    let command_stdout = String::from_utf8_lossy(&output.stdout).into_owned();
-
-                    println!("{}", String::from_utf8_lossy(&output.stdout));
-                    eprintln!("{}", String::from_utf8_lossy(&output.stderr));
+                    let result = if output.status.success() {
+                        String::from_utf8_lossy(&output.stdout).into_owned()
+                    } else {
+                        String::from_utf8_lossy(&output.stderr).into_owned()
+                    };
 
                     let tool_call_id = tool_call["id"].as_str().ok_or("MIssing tool id")?;
                     
                     messages.push(json!({
                             "role": "tool",
                             "tool_call_id": tool_call_id,
-                            "content": command_stdout
+                            "content": result
                         }))
                     }
                     }
